@@ -3,13 +3,14 @@ library(ca)
 source("eye_candy_theme.R")
 my_data <- read.csv(gzfile("nursery.csv.gz"))
 
-# create a multiple correspondence analysis
+# nursery data set
 my_data <- my_data %>% filter(decision != "very_recom"
                               , decision != "not_recom") %>%
  mutate(health = factor(health), decision=factor(decision)
         , form = factor(ifelse(as.character(form)=="completed", "complete", as.character(form))))
 
 
+# recid data set
 my_data <- read.csv(gzfile("rcdv.csv.gz"))
 my_data <- my_data %>% transmute(year = factor(year)
                                  , race = factor(ifelse(white==1, "caucasian", "africanAmerican"))
@@ -22,13 +23,16 @@ my_data <- my_data %>% transmute(year = factor(year)
                                  , propty = factor(ifelse(propty==1, "property", "non_property"))
                                  , person = factor(ifelse(person==1, "person", "non_preson"))
                                  , gender = factor(ifelse(male==1, "male", "female"))
+                                 , age = factor(ifelse(age/12 > 30, "mature", "young"))
+                                 , follow_up = factor(ifelse(follow>5, "long_term", "short_term"))
+                                 , time_served = factor(ifelse(log(tservd) > 0, ">year", "<year"))
                                  , record = factor(ifelse(missingness==1, "missing", "complete"))
                                  , recid = factor(ifelse(recid=="Y", "reoffend", "not_reoffend")))
 
-nlev <- c(2) # each has two levels
+nlev <- 2 # each has two levels
 cols <- myPalDark # 5 dimension
 
-analyse <- c("race", "alchy", "junky", "married", "recid")
+analyse <- c("race", "age", "time_served", "married", "recid")
 analyse <- sort(analyse)
 
 my_data.mca <- mjca(my_data[, analyse]) # ca library
@@ -52,27 +56,11 @@ text(coords[,1:2], labels=coords$level, col=rep(cols, each= nlev)
 segments(0, 0, coords[,"Dim1"], coords[, "Dim2"], col =rep(cols, each= nlev), lwd = 1, lty = 1)
 
 # add a legend
-legend("topright", legend=analyse,
+legend("bottomright", legend=analyse,
        title="Factor", title.col="black",
        col=cols, text.col=cols, pch=19:15,
        bg="gray95")
 
-## ----TV_day_network------------------------------------------------------
-margin.table(my_data, 1) # Day Marginal Totals
-margin.table(my_data, c(1, 3)) # Day by Channel
-
-## ----TV_time_network-----------------------------------------------------
-margin.table(my_data, 2) # Time Marginal Totals
-t(my_data[4,,]) # Thursday
-
-## ----feature_engineering----------------------------------------------------------
-m_coords
-
-dy <- subset(coords, factor=="Day")
-segments(dy[,"Dim1"], 0, dy[,"Dim1"], dy[, "Dim2"], lty=3, lwd=0.25, col="blue")
-points(rep(0, length(dy[,"Dim1"]))~dy[,"Dim1"], col="blue")
-segments(0, dy[,"Dim2"], dy[,"Dim1"], dy[, "Dim2"], lty=3, lwd=0.25, col="blue")
-points(dy[,"Dim2"]~rep(0, length(dy[,"Dim2"])), col="blue")
 
 ## ----tv_2wayca-----------------------------------------------------------
 # Flatten to 2-D by stacking Time onto Day
