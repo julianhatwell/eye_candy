@@ -28,7 +28,7 @@ my_data <- my_data %>% transmute(year = factor(year)
                                  , record = factor(ifelse(missingness==1, "missing", "complete"))
                                  , recid = factor(ifelse(recid=="Y", "reoffend", "not_reoffend")))
 
-# write.csv(my_data, "recid_factors.csv")
+# write.csv(my_data, "recid_factors.csv", row.names = FALSE)
 
 
 computer.data <- read.csv("machine.data"
