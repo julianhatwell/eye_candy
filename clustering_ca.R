@@ -29,7 +29,7 @@ text(coords[,1:2], labels=coords$level, col=rep(cols, each= nlev)
 segments(0, 0, coords[,"Dim1"], coords[, "Dim2"], col =rep(cols, each= nlev), lwd = 1, lty = 1)
 
 # add a legend
-legend("bottomright", legend=analyse,
+legend("topright", legend=analyse,
        title="Factor", title.col="black",
        col=cols, text.col=cols, pch=19:15,
        bg="gray95")
